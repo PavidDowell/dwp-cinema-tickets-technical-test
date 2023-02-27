@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 public class TicketValidator {
 
+    private boolean isValid = true;
+
     /**
      * Used to validate ticket requests
      * @param accountId - id of account making request
@@ -23,13 +25,12 @@ public class TicketValidator {
       return errors;
     }
 
-    private static boolean determineIfValid(final Long accountId, final Set<String> errors,
+    private boolean determineIfValid(final Long accountId, final Set<String> errors,
                                            final TicketTypeRequest... ticketTypeRequests) {
-        if (!isValidAccountId(accountId, errors)) {
+        if (!isValidAccountId(accountId, errors) || !validateTicketCount(errors, ticketTypeRequests)) {
             return false;
-        } else if (!validateTicketCount(errors, ticketTypeRequests)) {
-            return false;
-        } else if (!validateAdultTicketIsPresent(errors, ticketTypeRequests)){
+        }
+        if (!validateAdultTicketIsPresent(errors, ticketTypeRequests)){
             return false;
         }
         return true;
@@ -44,9 +45,9 @@ public class TicketValidator {
         return isValid;
     }
 
-    private static boolean validateTicketCount(Set<String> errors, final TicketTypeRequest... ticketTypeRequests) {
-        boolean isValid = true;
-        int ticketCount = Arrays.stream(ticketTypeRequests).map(TicketTypeRequest::getNoOfTickets).mapToInt(Integer::intValue).sum();
+    private boolean validateTicketCount(Set<String> errors, final TicketTypeRequest... ticketTypeRequests) {
+        int ticketCount = Arrays.stream(ticketTypeRequests).map(TicketTypeRequest::getNoOfTickets)
+                                .mapToInt(Integer::intValue).sum();
         if (ticketCount <= 0) {
             isValid = false;
             errors.add(ErrorCodes.TOO_FEW_TICKETS_ERROR.getErrorMessage());
@@ -57,8 +58,8 @@ public class TicketValidator {
         return isValid;
     }
 
-    private static boolean validateAdultTicketIsPresent(Set<String> errors, final TicketTypeRequest... ticketTypeRequests) {
-        boolean isValid = true;
+    private boolean validateAdultTicketIsPresent(Set<String> errors, final TicketTypeRequest... ticketTypeRequests) {
+        isValid = true;
         List<TicketTypeRequest> adultTicketRequests = Arrays.stream(ticketTypeRequests)
                 .filter(ticketTypeRequest -> ticketTypeRequest.getTicketType() == TicketTypeRequest.Type.ADULT)
                 .filter(ticketTypeRequest -> ticketTypeRequest.getNoOfTickets() != 0).collect(Collectors.toList());
