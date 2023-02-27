@@ -63,7 +63,8 @@ public class TicketServiceImpl implements TicketService {
      */
     private int calculateNumberOfSeats(final TicketTypeRequest... ticketTypeRequests) {
         return Arrays.stream(ticketTypeRequests)
-              .filter(type -> type.getTicketType().equals(TicketTypeRequest.Type.CHILD) || type.getTicketType().equals(TicketTypeRequest.Type.ADULT))
+              .filter(type -> type.getTicketType().equals(TicketTypeRequest.Type.CHILD)
+                           || type.getTicketType().equals(TicketTypeRequest.Type.ADULT))
                 .map(TicketTypeRequest::getNoOfTickets)
                 .mapToInt(value -> value).sum();
 
